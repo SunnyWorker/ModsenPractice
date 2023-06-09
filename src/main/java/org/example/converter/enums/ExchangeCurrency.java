@@ -1,6 +1,4 @@
-package org.example.converter;
-
-import org.example.converter.enums.Currency;
+package org.example.converter.enums;
 
 public record ExchangeCurrency(Currency currencyFrom, Currency currencyTo) {
     @Override
