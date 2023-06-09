@@ -1,4 +1,4 @@
-package org.example.converter;
+package org.example.converter.enums;
 
 public enum OperationType {
     toDollars(2), toRubles(2), add(1), subtract(1);
