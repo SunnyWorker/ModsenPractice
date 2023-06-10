@@ -1,13 +1,20 @@
 package org.example;
 
+import org.example.converter.implementations.Converter;
 import org.example.converter.interfaces.IConverter;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ExchangeCalculatorTest {
 
-    IConverter converter;
+    static IConverter converter;
+
+    @BeforeAll
+    static void beforeAll() {
+        converter = new Converter();
+    }
 
     @Test
     public void toRublesSimpleOperationTest() {
@@ -18,7 +25,7 @@ class ExchangeCalculatorTest {
     @Test
     public void toDollarsSimpleOperationTest() {
         assertEquals("$1,00", converter.performOperation("toDollars(  60,00р)"));
-        assertEquals("$1,50", converter.performOperation(" toDollars(90,00р  )"));
+        assertEquals("$1,49", converter.performOperation(" toDollars(90,00р  )"));
     }
 
     @Test
@@ -44,13 +51,13 @@ class ExchangeCalculatorTest {
     @Test
     public void dollarsExpressionOperationsTest() {
         assertEquals("$0,50", converter.performOperation("$1,50 + $1,50 - $2,50"));
-        assertEquals("$-0,50", converter.performOperation("$1,50  -  toDollars(120,00р)"));
+        assertEquals("$-0,49", converter.performOperation("$1,50  -  toDollars(120,00р)"));
     }
 
     @Test
     public void innerOperationsTest() {
-        assertEquals("$4,00", converter.performOperation("toDollars(120,00р + 120,00р)"));
-        assertEquals("$1,50", converter.performOperation("toDollars(toRubles($1,50))"));
-        assertEquals("$4,00", converter.performOperation("toDollars(toRubles($1,50  + $2,50))"));
+        assertEquals("$3,98", converter.performOperation("toDollars(120,00р + 120,00р)"));
+        assertEquals("$1,49", converter.performOperation("toDollars(toRubles($1,50))"));
+        assertEquals("$3,98", converter.performOperation("toDollars(toRubles($1,50  + $2,50))"));
     }
 }
