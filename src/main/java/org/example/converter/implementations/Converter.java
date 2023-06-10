@@ -41,7 +41,7 @@ public class Converter implements IConverter {
                 if(request.charAt(i)==')') brackets--;
                 if(brackets==0) {
                     request = request.substring(0,firstBracketId)
-                            + performOperation(stringBuilder.toString())
+                            + calculateExpression(stringBuilder.toString())
                             + request.substring(i+1);
                     break;
                 }
@@ -63,7 +63,7 @@ public class Converter implements IConverter {
         return maxPriority;
     }
 
-    private String calculateExpression(StringBuilder expression) {
+    private String calculateExpressionWithoutBrackets(StringBuilder expression) {
         expression = new StringBuilder(expression.toString().replace(" ", ""));
         int maxPriority;
         while((maxPriority = calculateMaxPriorityOfExpression(expression.toString()))!=0) {
@@ -83,9 +83,13 @@ public class Converter implements IConverter {
         return expression.toString();
     }
 
+    private String calculateExpression(String request) {
+        String unbracketedRequest = lookForBrackets(request);
+        return calculateExpressionWithoutBrackets(new StringBuilder(unbracketedRequest));
+    }
+
     @Override
     public String performOperation(String request) {
-        String unbracketedRequest = lookForBrackets(request);
-        return Currency.setFinalPrecision(calculateExpression(new StringBuilder(unbracketedRequest)));
+        return Currency.setFinalPrecision(calculateExpression(request));
     }
 }
