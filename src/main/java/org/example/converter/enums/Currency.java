@@ -30,19 +30,19 @@ public enum Currency {
         for (Currency value : Currency.values()) {
             Pattern pattern = Pattern.compile(value.getPattern());
             Matcher matcher = pattern.matcher(number);
-            if(matcher.find())
+            if (matcher.find())
                 return value;
         }
-        throw new IllegalOperationException("Pattern for string "+number+" was not found!");
+        throw new IllegalOperationException("Pattern for string " + number + " was not found!");
     }
 
     public String convertNumberIntoCurrency(String number) {
         switch (this) {
             case dollarUSA -> {
-                return "$"+number;
+                return "$" + number;
             }
             case russianRuble -> {
-                return number+"р";
+                return number + "р";
             }
             default -> {
                 return number;
@@ -54,13 +54,13 @@ public enum Currency {
         Currency usedCurrency = Currency.getPatternFromString(number);
         Pattern pattern = Pattern.compile("-?\\d+(,\\d+)?");
         Matcher matcher = pattern.matcher(number);
-        if(matcher.find())
+        if (matcher.find())
             number = matcher.group();
         return usedCurrency.convertNumberIntoCurrency(String.format("%.2f", Currency.parseToDouble(number)));
     }
 
     public static Double parseToDouble(String number) {
-        return Double.parseDouble(number.replace(",","."));
+        return Double.parseDouble(number.replace(",", "."));
     }
 
     public static String parseToString(Double number) {

@@ -4,7 +4,7 @@ import org.example.converter.enums.Currency;
 import org.example.converter.enums.OperationType;
 import org.example.converter.interfaces.IConverter;
 import org.example.converter.interfaces.IOperationExecutor;
-import org.example.dao.ExchangeRateFileSystemDAO;
+import org.example.dao.ExchangeRateFileSystemImporter;
 import org.example.exceptions.RequestSyntaxException;
 
 import java.util.regex.Matcher;
@@ -15,37 +15,36 @@ public class Converter implements IConverter {
     private final IOperationExecutor operationExecutor;
 
     public Converter() {
-        this.operationExecutor = new OperationExecutor(new ExchangeRateFileSystemDAO());
+        this.operationExecutor = new OperationExecutor(new ExchangeRateFileSystemImporter());
     }
 
     private void checkBracketsCorrectness(String request) {
         int brackets = 0;
         for (int i = 0; i < request.length(); i++) {
-            if(request.charAt(i)=='(') brackets++;
-            if(request.charAt(i)==')') brackets--;
-            if(brackets<0)
+            if (request.charAt(i) == '(') brackets++;
+            if (request.charAt(i) == ')') brackets--;
+            if (brackets < 0)
                 throw new RequestSyntaxException("Incorrect using of brackets in request!");
         }
-        if(brackets!=0)
+        if (brackets != 0)
             throw new RequestSyntaxException("Incorrect using of brackets in request!");
     }
 
     private String lookForBrackets(String request) {
         checkBracketsCorrectness(request);
-        while(request.contains("(")) {
+        while (request.contains("(")) {
             StringBuilder stringBuilder = new StringBuilder();
             int brackets = 1;
             int firstBracketId = request.indexOf("(");
-            for (int i = firstBracketId+1; i < request.length(); i++) {
-                if(request.charAt(i)=='(') brackets++;
-                if(request.charAt(i)==')') brackets--;
-                if(brackets==0) {
-                    request = request.substring(0,firstBracketId)
+            for (int i = firstBracketId + 1; i < request.length(); i++) {
+                if (request.charAt(i) == '(') brackets++;
+                if (request.charAt(i) == ')') brackets--;
+                if (brackets == 0) {
+                    request = request.substring(0, firstBracketId)
                             + calculateExpression(stringBuilder.toString())
-                            + request.substring(i+1);
+                            + request.substring(i + 1);
                     break;
-                }
-                else stringBuilder.append(request.charAt(i));
+                } else stringBuilder.append(request.charAt(i));
             }
         }
         return request;
@@ -66,20 +65,20 @@ public class Converter implements IConverter {
     private String calculateExpressionWithoutBrackets(StringBuilder expression) {
         expression = new StringBuilder(expression.toString().replace(" ", ""));
         int maxPriority;
-        while((maxPriority = calculateMaxPriorityOfExpression(expression.toString()))!=0) {
+        while ((maxPriority = calculateMaxPriorityOfExpression(expression.toString())) != 0) {
             for (OperationType operationType : OperationType.values()) {
-                if(operationType.getOperationPriority()==maxPriority) {
+                if (operationType.getOperationPriority() == maxPriority) {
                     Pattern pattern = operationType.getOperationPattern();
                     Matcher matcher = pattern.matcher(expression.toString());
-                    while(matcher.find()) {
+                    while (matcher.find()) {
                         String result = operationExecutor.executeOperation(operationType, matcher.group());
                         expression = new StringBuilder(expression.replace(matcher.start(), matcher.end(), result));
                     }
                 }
             }
         }
-        if(!Pattern.compile(Currency.getPatternOfAllCurrencies()).matcher(expression).matches())
-            throw new RequestSyntaxException("String "+expression+" doesn't match any possible pattern!");
+        if (!Pattern.compile(Currency.getPatternOfAllCurrencies()).matcher(expression).matches())
+            throw new RequestSyntaxException("String " + expression + " doesn't match any possible pattern!");
         return expression.toString();
     }
 

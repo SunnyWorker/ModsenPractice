@@ -8,19 +8,19 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class ExchangeRateFileSystemDAO implements IExchangeRateDAO {
+public class ExchangeRateFileSystemImporter implements IExchangeRateImporter {
     private static final String configurationFilename = "exchange_rates.bank";
     private Scanner configurationFileScanner;
     private HashMap<ExchangeCurrency, Double> exchangeRates;
 
-    public ExchangeRateFileSystemDAO() {
+    public ExchangeRateFileSystemImporter() {
         openFileScanner();
         calculateExchangeRates();
     }
 
     private void openFileScanner() {
         try {
-            this.configurationFileScanner = new Scanner(new FileInputStream("src/main/resources/"+configurationFilename));
+            this.configurationFileScanner = new Scanner(new FileInputStream("src/main/resources/" + configurationFilename));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -29,7 +29,7 @@ public class ExchangeRateFileSystemDAO implements IExchangeRateDAO {
     @Override
     public void calculateExchangeRates() {
         exchangeRates = new HashMap<>();
-        while(configurationFileScanner.hasNextLine()) {
+        while (configurationFileScanner.hasNextLine()) {
             Currency currencyFrom = Currency.valueOf(configurationFileScanner.next());
             Currency currencyTo = Currency.valueOf(configurationFileScanner.next());
             Double rate = Double.valueOf(configurationFileScanner.next());
