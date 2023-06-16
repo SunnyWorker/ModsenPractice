@@ -4,8 +4,9 @@ import org.example.converter.enums.Currency;
 import org.example.converter.enums.OperationType;
 import org.example.converter.interfaces.IConverter;
 import org.example.converter.interfaces.IOperationExecutor;
-import org.example.dao.ExchangeRateFileSystemImporter;
-import org.example.exceptions.RequestSyntaxException;
+import org.example.exceptions.request_syntax.IncorrectBracketsException;
+import org.example.exceptions.request_syntax.PatternNotFoundException;
+import org.example.importer.ExchangeRateFileSystemImporter;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,10 +25,10 @@ public class Converter implements IConverter {
             if (request.charAt(i) == '(') brackets++;
             if (request.charAt(i) == ')') brackets--;
             if (brackets < 0)
-                throw new RequestSyntaxException("Incorrect using of brackets in request!");
+                throw new IncorrectBracketsException();
         }
         if (brackets != 0)
-            throw new RequestSyntaxException("Incorrect using of brackets in request!");
+            throw new IncorrectBracketsException();
     }
 
     private String lookForBrackets(String request) {
@@ -78,7 +79,7 @@ public class Converter implements IConverter {
             }
         }
         if (!Pattern.compile(Currency.getPatternOfAllCurrencies()).matcher(expression).matches())
-            throw new RequestSyntaxException("String " + expression + " doesn't match any possible pattern!");
+            throw new PatternNotFoundException(expression.toString());
         return expression.toString();
     }
 

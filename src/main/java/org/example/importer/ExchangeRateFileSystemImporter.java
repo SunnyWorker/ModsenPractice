@@ -1,4 +1,4 @@
-package org.example.dao;
+package org.example.importer;
 
 import org.example.converter.enums.Currency;
 import org.example.converter.enums.ExchangeCurrency;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class ExchangeRateFileSystemImporter implements IExchangeRateImporter {
-    private static final String configurationFilename = "exchange_rates.bank";
+    private static final String CONFIGURATION_FILENAME = "exchange_rates.bank";
     private Scanner configurationFileScanner;
     private HashMap<ExchangeCurrency, Double> exchangeRates;
 
@@ -20,7 +20,7 @@ public class ExchangeRateFileSystemImporter implements IExchangeRateImporter {
 
     private void openFileScanner() {
         try {
-            this.configurationFileScanner = new Scanner(new FileInputStream("src/main/resources/" + configurationFilename));
+            this.configurationFileScanner = new Scanner(new FileInputStream("src/main/resources/" + CONFIGURATION_FILENAME));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

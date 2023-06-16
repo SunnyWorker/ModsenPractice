@@ -1,12 +1,12 @@
 package org.example.converter.enums;
 
-import org.example.exceptions.IllegalOperationException;
+import org.example.exceptions.illegal_operation.PatternNotFoundException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum Currency {
-    dollarUSA("\\$-?\\d+(,\\d+)?"), russianRuble("-?\\d+(,\\d+)?р");
+    DOLLAR_USA("\\$-?\\d+(,\\d+)?"), RUSSIAN_RUBLE("-?\\d+(,\\d+)?р");
     private final String pattern;
 
     Currency(String pattern) {
@@ -26,32 +26,30 @@ public enum Currency {
         return pattern.toString();
     }
 
-    public static Currency getPatternFromString(String number) {
+    public static Currency getCurrencyFromString(String number) {
         for (Currency value : Currency.values()) {
             Pattern pattern = Pattern.compile(value.getPattern());
             Matcher matcher = pattern.matcher(number);
             if (matcher.find())
                 return value;
         }
-        throw new IllegalOperationException("Pattern for string " + number + " was not found!");
+        throw new PatternNotFoundException(number);
     }
 
     public String convertNumberIntoCurrency(String number) {
         switch (this) {
-            case dollarUSA -> {
+            case DOLLAR_USA -> {
                 return "$" + number;
             }
-            case russianRuble -> {
+            case RUSSIAN_RUBLE -> {
                 return number + "р";
             }
-            default -> {
-                return number;
-            }
+            default -> throw new PatternNotFoundException(number);
         }
     }
 
     public static String setFinalPrecision(String number) {
-        Currency usedCurrency = Currency.getPatternFromString(number);
+        Currency usedCurrency = Currency.getCurrencyFromString(number);
         Pattern pattern = Pattern.compile("-?\\d+(,\\d+)?");
         Matcher matcher = pattern.matcher(number);
         if (matcher.find())

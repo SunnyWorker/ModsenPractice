@@ -4,8 +4,10 @@ import org.example.converter.enums.Currency;
 import org.example.converter.enums.ExchangeCurrency;
 import org.example.converter.enums.OperationType;
 import org.example.converter.interfaces.IOperationExecutor;
-import org.example.dao.IExchangeRateImporter;
-import org.example.exceptions.IllegalOperationException;
+import org.example.exceptions.illegal_operation.ArithmeticDifferentCurrenciesException;
+import org.example.exceptions.illegal_operation.RecursiveConvertException;
+import org.example.exceptions.illegal_operation.UnknownOperationException;
+import org.example.importer.IExchangeRateImporter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,7 @@ public class OperationExecutor implements IOperationExecutor {
             Matcher matcher = pattern.matcher(operationString);
             if (matcher.find()) {
                 if (value.equals(currency))
-                    throw new IllegalOperationException("You can't transform currencies into themselves!");
+                    throw new RecursiveConvertException();
                 String number = matcher.group();
                 pattern = Pattern.compile("-?\\d+(,\\d+)?");
                 matcher = pattern.matcher(number);
@@ -36,22 +38,22 @@ public class OperationExecutor implements IOperationExecutor {
                 return Currency.parseToString(doubleNumber * exchangeRateImporter.getExchangeRates().get(new ExchangeCurrency(value, currency)));
             }
         }
-        throw new IllegalOperationException("Unknown operation!");
+        throw new UnknownOperationException();
     }
 
     public String executeOperation(OperationType operationType, String operationString) {
         switch (operationType) {
-            case add -> {
+            case ADD -> {
                 List<String> operands = new ArrayList<>(2);
                 double operand1 = 0, operand2 = 0;
-                Currency usedCurrency = Currency.dollarUSA;
+                Currency usedCurrency = Currency.DOLLAR_USA;
                 for (Currency value : Currency.values()) {
                     Pattern pattern = Pattern.compile(value.getPattern());
                     Matcher matcher = pattern.matcher(operationString);
                     while (matcher.find())
                         operands.add(matcher.group());
                     if (operands.size() == 1)
-                        throw new IllegalOperationException("Addition of different currencies is illegal!");
+                        throw new ArithmeticDifferentCurrenciesException(operationType.toString());
                     if (operands.size() == 2) {
                         usedCurrency = value;
                         break;
@@ -66,10 +68,10 @@ public class OperationExecutor implements IOperationExecutor {
                     operand2 = Currency.parseToDouble(matcher.group());
                 return usedCurrency.convertNumberIntoCurrency(Currency.parseToString(operand1 + operand2));
             }
-            case subtract -> {
+            case SUBTRACT -> {
                 List<String> operands = new ArrayList<>(2);
                 double operand1 = 0, operand2 = 0;
-                Currency usedCurrency = Currency.dollarUSA;
+                Currency usedCurrency = Currency.DOLLAR_USA;
                 for (Currency value : Currency.values()) {
                     Pattern pattern = Pattern.compile(value.getPattern());
                     Matcher matcher = pattern.matcher(operationString);
@@ -79,7 +81,7 @@ public class OperationExecutor implements IOperationExecutor {
                             matcher.region(matcher.end() + 1, operationString.length());
                     }
                     if (operands.size() == 1)
-                        throw new IllegalOperationException("Subtraction of different currencies is illegal!");
+                        throw new ArithmeticDifferentCurrenciesException(operationType.toString());
                     if (operands.size() == 2) {
                         usedCurrency = value;
                         break;
@@ -94,13 +96,13 @@ public class OperationExecutor implements IOperationExecutor {
                     operand2 = Currency.parseToDouble(matcher.group());
                 return usedCurrency.convertNumberIntoCurrency(Currency.parseToString(operand1 - operand2));
             }
-            case toRubles -> {
-                return Currency.russianRuble.convertNumberIntoCurrency(executeExchangeRatesOperation(operationString, Currency.russianRuble));
+            case TO_RUBLES -> {
+                return Currency.RUSSIAN_RUBLE.convertNumberIntoCurrency(executeExchangeRatesOperation(operationString, Currency.RUSSIAN_RUBLE));
             }
-            case toDollars -> {
-                return Currency.dollarUSA.convertNumberIntoCurrency(executeExchangeRatesOperation(operationString, Currency.dollarUSA));
+            case TO_DOLLARS -> {
+                return Currency.DOLLAR_USA.convertNumberIntoCurrency(executeExchangeRatesOperation(operationString, Currency.DOLLAR_USA));
             }
-            default -> throw new IllegalOperationException("Unknown operation!");
+            default -> throw new UnknownOperationException();
         }
     }
 }
